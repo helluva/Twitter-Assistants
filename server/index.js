@@ -1,6 +1,5 @@
 const express = require('express')
 const path = require('path')
-const handlebars = require('express-handlebars')
 const request = require('request')
 const bodyParser = require('body-parser')
 const fs = require('fs')
@@ -14,16 +13,6 @@ app.use(bodyParser.raw({limit: "100mb"}))
 
 //setup endpoints
 
-app.engine('.hbs', handlebars({
-    defaultLayout: 'main',
-    extname: '.hbs',
-    layoutsDir: path.join(__dirname, 'views/layouts')
-}))
-
-app.set('view engine', '.hbs')
-app.set('views', path.join(__dirname, 'views'))
-
-
 var queued_tasks = []
 var completed_tasks = []
 var rawtexts = {}
@@ -33,13 +22,6 @@ var waiting_for_server = false
 //***********************
 //client-facing endpoints
 //***********************
-
-//main HTML of the site
-app.get('/', (request, response) => {
-    response.render('home', {
-        url: request.url
-    })
-})
 
 //uploads an audio file though body["audio-base64"]. response["task-id"] is an identifier for the queued task.
 //if body["raw-text"] exists, the base64 audio is ignored.

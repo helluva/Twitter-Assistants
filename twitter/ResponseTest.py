@@ -1,4 +1,4 @@
-import tweepy, datetime
+import tweepy, datetime, json, threading
 
 from twitter_keys import keys
 
@@ -35,11 +35,19 @@ def run_reply_cycle():
 	  
 	  #also strips out @Alexa_vs_Siri handle at beginning
 	  print("Mention said: " + tweet.text[15:])
-	  #sends Mention to Alexa
-	  CallServer.serverCall(tweet.text[15:])
-	  
+	  #sends Mention to Alexa and gets jsonResponse
+	  jsonResponseString = CallServer.serverCall(tweet.text[15:])
+
 
 	  #Server call to get response message goes here
+	  datastore = json.loads(jsonResponseString)
+	  taskID = datastore["task-id"]
+	  print(taskID)
+	  
+	  #Every 2 seconds or so pull for Alexa/assistant responses
+	  threading.Timer(2.0, CallServer.responseCall(taskID)).start()
+	  datastore2 = json.loads(assistantResponses)
+	  print(datastore2)
 
 	  tweeterName = tweet.user.screen_name
 	  #@'ing the tweeterName a response message

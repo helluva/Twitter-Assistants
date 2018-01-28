@@ -121,7 +121,7 @@ class StatusMenuController: NSObject {
 
 
     func record() {
-        let outputPath = "/Users/\(AppConfiguration.username)/Desktop/output.mp4"
+        let outputPath = "\(AppConfiguration.homeDir)/Desktop/output.mp4"
         checkFile(path: outputPath)
         let url = URL(fileURLWithPath: outputPath)
         

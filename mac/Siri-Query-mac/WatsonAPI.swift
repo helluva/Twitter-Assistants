@@ -26,7 +26,7 @@ class WatsonAPI {
             "-X", "POST",
             "-u", "0d884b88-0ed4-43e6-b6d3-a81f4d440ffa:0j6VcHydZj4K", // IBM endpoint username:password
             "--header", "Content-Type: audio/mpeg",
-            "--data-binary", "@/Users/\(AppConfiguration.username)/Desktop/\(nameOfFileOnDesktop)",
+            "--data-binary", "@\(AppConfiguration.homeDir)/Desktop/\(nameOfFileOnDesktop)",
             "https://stream.watsonplatform.net/speech-to-text/api/v1/recognize"]
         
         print("Spawning Speech to Text request...")

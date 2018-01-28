@@ -9,7 +9,7 @@
 import Foundation
 
 struct AppConfiguration {
-    
-    static let username = "cal"
+
+    static let homeDir = "\(URL(fileURLWithPath: NSHomeDirectory()).path)"
     
 }

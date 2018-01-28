@@ -10,10 +10,6 @@ import Cocoa
 import AVKit
 import AVFoundation
 
-let inputPath = "~/Desktop/input.wav"
-let outputPath = "~/Desktop/output.mp4"
-let imagePath = "~/Desktop/screenshot.jpg"
-
 class StatusMenuController: NSObject {
     @IBOutlet weak var menuOutlet: NSMenuItem!
     
@@ -32,8 +28,9 @@ class StatusMenuController: NSObject {
         statusItem.image = icon
         statusItem.menu = statusMenu
         
-        AssistantAPI.resetServer()
-        pollForNextTweet()
+        record()
+        //AssistantAPI.resetServer()
+        //pollForNextTweet()
     }
     
     func pollForNextTweet() {
@@ -91,47 +88,29 @@ class StatusMenuController: NSObject {
     }
     
     func runSiri(rawText: String) {
-        if rawText == "FALSE" {
-            let url = URL(fileURLWithPath: inputPath)
-            player = AVPlayer(url: url)
-        
-            NSWorkspace.shared().launchApplication("/Applications/Siri.app")
-        
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
-                self.player.play()
-            
-                let length = self.player.currentItem?.asset.duration
-                let duration = Int(1000 * (CMTimeGetSeconds(length!)))
-            
-                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(duration + 250), execute: {
-                    self.record()
-                    self.menuOutlet.title = "Listening to Siri..."
-                })
-            })
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
-                let task = Process()
-                task.launchPath = "/usr/bin/say"
-                task.arguments = [rawText]
-                task.launch()
-                task.waitUntilExit()
-            })
-            self.record()
-            self.menuOutlet.title = "Listening to Siri..."
-        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
+            let task = Process()
+            task.launchPath = "/usr/bin/say"
+            task.arguments = [rawText]
+            task.launch()
+            task.waitUntilExit()
+        })
+        self.record()
+        self.menuOutlet.title = "Listening to Siri..."
     }
 
 
     func record() {
+        let outputPath = "/Users/\(AppConfiguration.username)/Desktop/output.mp4"
         checkFile(path: outputPath)
-        
         let url = URL(fileURLWithPath: outputPath)
+        
         let startTime = Date()
         
         recorder = try? AVAudioRecorder(url: url, settings: [AVFormatIDKey : kAudioFormatMPEG4AAC, AVSampleRateKey : 44100])
         recorder.prepareToRecord()
         recorder.isMeteringEnabled = true
-        recorder.record()
+        print(recorder.record())
         
         levelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { (Timer) in
             self.recorder.updateMeters()

@@ -33,7 +33,8 @@ class StatusMenuController: NSObject {
         
         AssistantAPI.resetServer()
         pollForNextTweet()
-        self.spawnGoogle(withQuery: "hello google how are you")
+//        self.spawnGoogle(withQuery: "hello google how are you")
+        self.spawnSiri(rawText: "testing hello siri")
     }
     
     func pollForNextTweet() {
@@ -107,7 +108,9 @@ class StatusMenuController: NSObject {
         task.waitUntilExit()
     }
     
-    func runSiri(rawText: String) {
+    func spawnSiri(rawText: String) {
+        NSWorkspace.shared.launchApplication("/Applications/Siri.app")
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
             let task = Process()
             task.launchPath = "/usr/bin/say"

@@ -1,4 +1,4 @@
-import tweepy, datetime, json, threading
+import tweepy, datetime, json, time
 
 from twitter_keys import keys
 
@@ -32,33 +32,102 @@ def run_reply_cycle():
 	#for all tweets @'ed to the bot...
 	#if tweet.lang == "en" restricts responses to english only tweets
 	for tweet in mentionTweets:
-	  
-	  #also strips out @Alexa_vs_Siri handle at beginning
-	  print("Mention said: " + tweet.text[15:])
-	  #sends Mention to Alexa and gets jsonResponse
-	  jsonResponseString = CallServer.serverCall(tweet.text[15:])
+
+		#also strips out @Alexa_vs_Siri handle at beginning
+		print("Mention said: " + tweet.text[15:])
+		#sends Mention to Alexa and gets jsonResponse
+		jsonResponseString = CallServer.serverCall(tweet.text[15:])
 
 
-	  #Server call to get response message goes here
-	  datastore = json.loads(jsonResponseString)
-	  taskID = datastore["task-id"]
-	  print(taskID)
-	  
-	  #Every 2 seconds or so pull for Alexa/assistant responses
-	  threading.Timer(2.0, CallServer.responseCall(taskID)).start()
-	  datastore2 = json.loads(assistantResponses)
-	  print(datastore2)
+		#Server call to get response message goes here
+		datastore = json.loads(jsonResponseString)
+		taskID = datastore["task-id"]
+		print(taskID)
 
-	  tweeterName = tweet.user.screen_name
-	  #@'ing the tweeterName a response message
-	  message = "@" + str(tweeterName) + " " + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + " " + "Hey nort, I'm a bot"
+		#for 20 seconds or so pull for Alexa/assistant responses
+		#threading.Timer(2.0, CallServer.responseCall(taskID)).start()
+		endTime = time.time() + 200
+		shouldContinuePolling = True
+
+		hasSentAlexaReply = False
+		hasSentGoogleReply = False
+		hasSentSiriReply = False
+
+		while time.time() < endTime or shouldContinuePolling:
+			assistantResponses = CallServer.responseCall(taskID)
+			datastore2 = json.loads(assistantResponses)
+
+			siriResponse = None
+			alexaResponse = None
+			googleResponse = None
+
+			print(datastore2)
+
+			if datastore2["siri-response"] != 'WAITING_FOR_RESPONSE':
+				siriResponse = datastore2["siri-response"]
+
+			if datastore2["alexa-response"] != 'WAITING_FOR_RESPONSE':
+				alexaResponse = datastore2["alexa-response"]
+
+			if datastore2["google-response"] != 'WAITING_FOR_RESPONSE':
+				googleResponse = datastore2["google-response"]
+
+			if siriResponse == None or alexaResponse == None or googleResponse == None:
+				print("still waiting...")
+				print("SIRI: " + datastore2["siri-response"])
+				print("ALEXA: " + datastore2["alexa-response"])
+				print("GOOGLE:" + datastore2["google-response"])
+				print(time.time())
+
+			print(datastore2)
+			mostRecentTweetId = ""
+
+			#tweet the siri response if it exists 
+			if (siriResponse is not None and siriResponse != "WAITING_FOR_RESPONSE" and not hasSentSiriReply):
+			  tweeterName = tweet.user.screen_name
+			  siriMessage = "@" + str(tweeterName) + " Siri: " + siriResponse + " (" + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + ")"
+			  print("Tweeted " + siriMessage)
+
+			  #this sends our tweet
+			  tweet = api.update_status(siriMessage, tweet.id)
+			  print ("Replied to ID: " + str(tweet.id))
+			  mostRecentTweetId = tweet.id
+			  hasSentSiriReply = True
+
+			#tweet the alexa response if it exists 
+			if (alexaResponse is not None and alexaResponse != "WAITING_FOR_RESPONSE" and not hasSentAlexaReply):
+			  tweeterName = tweet.user.screen_name
+			  alexaMessage = "@" + str(tweeterName) + " Alexa: " + alexaResponse + " (" + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + ")"
+			  print("Tweeted " + alexaMessage)
+
+			  #this sends our tweet
+			  tweet = api.update_status(alexaMessage, tweet.id)
+			  print ("Replied to ID: " + str(tweet.id))
+			  mostRecentTweetId = tweet.id
+			  hasSentAlexaReply = True
+
+			#tweet the alexa response if it exists 
+			if (googleResponse is not None and googleResponse != "WAITING_FOR_RESPONSE" and not hasSentGoogleReply):
+			  tweeterName = tweet.user.screen_name
+			  googleMessage = "@" + str(tweeterName) + " Google Asst: " + googleResponse + " (" + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + ")"
+			  print("Tweeted " + siriMessage)
+
+			  #this sends our tweet
+			  tweet = api.update_status(googleMessage, tweet.id)
+			  print ("Replied to ID: " + str(tweet.id))
+			  mostRecentTweetId = tweet.id
+			  hasSentGoogleReply = True
+
+			if mostRecentTweetId is not "":
+			  #write most recent reply tweet.id to file
+			  idFile = open("last_id_replied.py","w")
+			  idFile.write(str(tweet.id))
+			  idFile.close()
+
+			if hasSentGoogleReply and hasSentAlexaReply and hasSentSiriReply:
+				  shouldContinuePolling = false
+
+			time.sleep(3)
 
 
-	  #this sends our tweet
-	  tweet = api.update_status(message, tweet.id)
-	  print ("Replied to ID: " + str(tweet.id))
 
-	  #write most recent reply tweet.id to file
-	  idFile = open("last_id_replied.py","w")
-	  idFile.write(str(tweet.id))
-	  idFile.close()

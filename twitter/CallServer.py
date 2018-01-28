@@ -1,5 +1,7 @@
 import urllib.request
+import urllib.parse
 
-urllib.request.urlopen("http://server.calstephens.tech:8081/uploadQuery?tweet-text=ABC").read()
-#True for false
-#some print
+def serverCall(tweetText):
+	urllib.request.urlopen("http://server.calstephens.tech:8081/uploadQuery?tweet-text=" + urllib.parse.quote(tweetText)).read()
+	#True for false
+	#some print

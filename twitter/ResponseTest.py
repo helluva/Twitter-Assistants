@@ -2,6 +2,8 @@ import tweepy, datetime
 
 from twitter_keys import keys
 
+import CallServer
+
 def run_reply_cycle():
 	currentTime = datetime.datetime.now()
 
@@ -30,14 +32,25 @@ def run_reply_cycle():
 	#for all tweets @'ed to the bot...
 	#if tweet.lang == "en" restricts responses to english only tweets
 	for tweet in mentionTweets:
-	  tweeterName = tweet.user.screen_name
-	  #@'ing the tweeterName
-	  message = "@" + str(tweeterName) + " " + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + " " + "Hey nort, I'm a bot"
 	  
+	  #also strips out @Alexa_vs_Siri handle at beginning
+	  print("Mention said: " + tweet.text[15:])
+	  #sends Mention to Alexa
+	  CallServer.serverCall(tweet.text[15:])
+	  
+
+	  #Server call to get response message goes here
+
+	  tweeterName = tweet.user.screen_name
+	  #@'ing the tweeterName a response message
+	  message = "@" + str(tweeterName) + " " + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + " " + "Hey nort, I'm a bot"
+
 
 	  #this sends our tweet
 	  tweet = api.update_status(message, tweet.id)
 	  print ("Replied to ID: " + str(tweet.id))
+
+	  #write most recent reply tweet.id to file
 	  idFile = open("last_id_replied.py","w")
 	  idFile.write(str(tweet.id))
 	  idFile.close()

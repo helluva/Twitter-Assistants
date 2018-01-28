@@ -18,14 +18,14 @@ class WatsonAPI {
         let outputPipe = Pipe()
         
         task.standardOutput = outputPipe
-        task.launchPath = "/usr/local/opt/curl/bin/curl"
+        task.launchPath = "/usr/bin/curl"//"/usr/local/opt/curl/bin/curl"
         
         // cURL arguments: https://developer.ibm.com/answers/questions/244630/speech-to-text-error-using-pre-recorded-audio-file.html
         task.arguments = [
             "-s", // silence cURL's progress indicator
             "-X", "POST",
             "-u", "0d884b88-0ed4-43e6-b6d3-a81f4d440ffa:0j6VcHydZj4K", // IBM endpoint username:password
-            "--header", "Content-Type: audio/flac",
+            "--header", "Content-Type: audio/mulaw;rate=44100",
             "--data-binary", "@\(AppConfiguration.homeDir)/Desktop/\(nameOfFileOnDesktop)",
             "https://stream.watsonplatform.net/speech-to-text/api/v1/recognize"]
         

@@ -33,7 +33,8 @@ class StatusMenuController: NSObject {
         
         AssistantAPI.resetServer()
         pollForNextTweet()
-        self.spawnGoogle(withQuery: "hello google how are you")
+//        self.spawnGoogle(withQuery: "hello google how are you")
+        self.spawnSiri(rawText: "testing hello siri")
     }
     
     func pollForNextTweet() {
@@ -107,7 +108,9 @@ class StatusMenuController: NSObject {
         task.waitUntilExit()
     }
     
-    func runSiri(rawText: String) {
+    func spawnSiri(rawText: String) {
+        NSWorkspace.shared.launchApplication("/Applications/Siri.app")
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
             let task = Process()
             task.launchPath = "/usr/bin/say"
@@ -121,13 +124,17 @@ class StatusMenuController: NSObject {
 
 
     func record() {
-        let outputPath = "\(AppConfiguration.homeDir)/Desktop/output.flac"
+        let outputPath = "\(AppConfiguration.homeDir)/Desktop/output.ulaw"
         checkFile(path: outputPath)
         let url = URL(fileURLWithPath: outputPath)
         
         let startTime = Date()
         
-        recorder = try? AVAudioRecorder(url: url, settings: [AVFormatIDKey : kAudioFormatFLAC, AVSampleRateKey : 44100])
+        do {
+            recorder = try AVAudioRecorder(url: url, settings: [AVFormatIDKey : kAudioFormatULaw, AVSampleRateKey : 44100])
+        } catch(let error) {
+            print(error.localizedDescription)
+        }
         recorder.prepareToRecord()
         recorder.isMeteringEnabled = true
         print(recorder.record())
@@ -145,7 +152,7 @@ class StatusMenuController: NSObject {
                         //AssistantAPI.deliverResponse(imagePath: imagePath, audioPath: outputPath)
                         //self.getInput()
                         self.googleProcess?.terminate()
-                        WatsonAPI.curlSpeechToText(fromFileOnDesktopNamed: "output.flac", completion: { string in
+                        WatsonAPI.curlSpeechToText(fromFileOnDesktopNamed: "output.ulaw", completion: { string in
                             print(string)
                         })
                     })

@@ -10,7 +10,7 @@ import Foundation
 
 class AssistantAPI {
     
-    private static let developmentMode = true
+    private static let developmentMode = false
     
     static var baseURL: URL {
         if AssistantAPI.developmentMode {

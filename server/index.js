@@ -43,7 +43,11 @@ app.get('/pollForAssistantResponses', (request, response) => {
     console.log("received pollForAssistantResponse for task with id " + taskId)
     
     function valueForCompletedTaskKey(key) {
-        var value = completed_tasks[taskId]
+        if (completed_tasks[taskId] == undefined) {
+            return "WAITING_FOR_RESPONSE"
+        }
+        
+        var value = completed_tasks[taskId][key]
         if (value == undefined || value == "") {
             return "WAITING_FOR_RESPONSE"
         } else {
@@ -103,6 +107,9 @@ app.post('/deliverAssistantResponses', (request, response) => {
     siri_response = request.body["siri-response"]
     alexa_response = request.body["alexa-response"]
     google_response = request.body["google-response"]
+    console.log("siri_response: " + siri_response)
+    console.log("alexa_response: " + alexa_response)
+    console.log("google_response: " + google_response)
     
     if (task_id == undefined 
         || (siri_response == undefined 

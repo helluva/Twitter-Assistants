@@ -10,7 +10,7 @@ import Foundation
 
 class AssistantAPI {
     
-    private static let developmentMode = true
+    private static let developmentMode = false
     
     static var baseURL: URL {
         if AssistantAPI.developmentMode {
@@ -59,14 +59,27 @@ class AssistantAPI {
         })
     }
     
-    static func deliverResponse(siriResponse: String, alexaResponse: String, completion: @escaping () -> Void) {
-        let bodyJson = "{\"task-id\": \"\(currentTaskID!)\", \"siri-response\": \"\(siriResponse)\", \"alexa-response\": \"\(alexaResponse)\"}"
+    static func deliverResponse(
+        siriResponse: String? = nil,
+        alexaResponse: String? = nil,
+        googleResponse: String? = nil,
+        completion: @escaping () -> Void = {})
+    {
+        var bodyDict = [String: String]()
+        bodyDict["task-id"] = currentTaskID!
+        
+        if let siriResponse = siriResponse { bodyDict["siri-response"] = siriResponse }
+        if let alexaResponse = alexaResponse { bodyDict["alexa-response"] = alexaResponse }
+        if let googleResponse = googleResponse { bodyDict["google-response"] = googleResponse }
+        let bodyJson = try! JSONSerialization.data(withJSONObject: bodyDict, options: [])
+        print(String(data: bodyJson, encoding: .utf8))
+        
         
         //post the data
         let url = AssistantAPI.baseURL.appendingPathComponent("/deliverAssistantResponses")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.httpBody = bodyJson.data(using: .utf8)
+        request.httpBody = bodyJson
         request.setValue("application/json", forHTTPHeaderField:"Content-Type")
         
         URLSession.shared.dataTask(with: request, completionHandler: { (data, _, error) -> () in

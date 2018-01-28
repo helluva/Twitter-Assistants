@@ -14,10 +14,9 @@ app.use(bodyParser.raw({limit: "100mb"}))
 //setup endpoints
 
 var queued_tasks = []
-var completed_tasks = []
+var completed_tasks = {}
 var rawtexts = {}
-var waiting_for_server = false
-
+var waiting_for_servers = false
 
 //***********************
 //client-facing endpoints
@@ -39,19 +38,26 @@ app.get('/uploadQuery', (request, response) => {
 //body["task-id"] should be an identifier from /uploadBlob.
 //response["code"] is either unknown-task, waiting-for-server, or response-ready.
 //if response-ready, then response["response"] will be something when i get to it
-app.post('/pollForSiriResponse', (request, response) => {
-    var taskId = request.body["task-id"]
+app.get('/pollForAssistantResponses', (request, response) => {
+    var taskId = request.query["task-id"]
+    console.log("received pollForAssistantResponse for task with id " + taskId)
     
-    if (!completed_tasks.includes(taskId)) {
-        if (!queued_tasks.includes(taskId)) {
-            response.send({'status': 'failure', 'code': 'unknown-task'})
+    function valueForCompletedTaskKey(key) {
+        var value = completed_tasks[taskId]
+        if (value == undefined || value == "") {
+            return "WAITING_FOR_RESPONSE"
         } else {
-            response.send({'status': 'failure', 'code': 'waiting-for-server'})
+            return value
         }
-        return
     }
     
-    response.send({'status': 'success', 'code': 'response-ready'})
+    var responseJson = {}
+    responseJson.status = "success"
+    responseJson["siri-response"] = valueForCompletedTaskKey("siri-response")
+    responseJson["alexa-response"] = valueForCompletedTaskKey("alexa-response")
+    responseJson["google-response"] = valueForCompletedTaskKey("google-response")
+    
+    response.send(responseJson)
 })
 
 
@@ -59,14 +65,14 @@ app.post('/pollForSiriResponse', (request, response) => {
 
 
 app.get('/reset', (request, response) => {
-    waiting_for_server = false
+    waiting_for_servers = false
     response.send({status: 'success'})
 })
 
 app.get('/tweetsAvailable', (request, response) => {
     console.log("tweets avaiable? "+ queued_tasks)
     
-    if (waiting_for_server) {
+    if (waiting_for_servers) {
         response.send("false")
         return
     }
@@ -75,7 +81,7 @@ app.get('/tweetsAvailable', (request, response) => {
         response.send("false")
     } else {
         response.send(queued_tasks[0]) //send the first task id
-        waiting_for_server = true //don't send another tweet until the server sends back a response
+        waiting_for_servers = true //don't send another tweet until the servers send back each response
     }
 })
 
@@ -96,20 +102,37 @@ app.post('/deliverAssistantResponses', (request, response) => {
     task_id = request.body["task-id"]
     siri_response = request.body["siri-response"]
     alexa_response = request.body["alexa-response"]
+    google_response = request.body["google-response"]
     
     if (task_id == undefined 
-        || siri_response == undefined 
-        || alexa_response == undefined ) 
+        || (siri_response == undefined 
+            && alexa_response == undefined
+            && google_response == undefined)) 
     {
         response.send({status: 'failure'})
         return
     }
     
-    queued_tasks.shift() //remove the current task
-    //array.splice(queued_tasks, queued_tasks.indexOf(task_id)) //remove the task
-    waiting_for_server = false //allow the server to receive more recordings
-    
-    completed_tasks.push(task_id)
+    if (siri_response != undefined) {
+        completed_tasks[task_id]["siri-response"] = siri_response
+    }
+
+    if (alexa_response != undefined) {
+        completed_tasks[task_id]["alexa-response"] = alexa_response
+    }
+
+    if (google_response != undefined) {
+        completed_tasks[task_id]["google-response"] = google_response
+    }
+
+    if (completed_tasks["siri-response"] != undefined
+        && completed_tasks["alexa-response"] != undefined
+        && completed_tasks["google-response"] != undefined)
+    {
+        queued_tasks.shift() //remove the current task
+        waiting_for_servers = false //allow the server to receive more recordings
+    }
+
     response.send({status: 'success'})
 })
 

@@ -113,6 +113,10 @@ app.post('/deliverAssistantResponses', (request, response) => {
         return
     }
     
+    if (completed_tasks[task_id] == undefined) {
+        completed_tasks[task_id] = {}
+    }
+    
     if (siri_response != undefined) {
         completed_tasks[task_id]["siri-response"] = siri_response
     }

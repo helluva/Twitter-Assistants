@@ -33,7 +33,6 @@ class StatusMenuController: NSObject {
         
         AssistantAPI.resetServer()
         pollForNextTweet()
-        self.spawnGoogle(withQuery: "hello google how are you")
     }
     
     func pollForNextTweet() {
@@ -47,7 +46,7 @@ class StatusMenuController: NSObject {
                 guard let tweetText = tweetText else { return }
                 print("Received tweet \(tweetText)")
                 self.spawnAlexa(withQuery: tweetText, completion: {
-                    AssistantAPI.deliverResponse(siriResponse: "no siri response", alexaResponse: "spawned alexa response", completion: {
+                    AssistantAPI.deliverResponse(alexaResponse: "spawned alexa response", completion: {
                         self.pollForNextTweet()
                     })
                 })

@@ -10,10 +10,6 @@ import Cocoa
 import AVKit
 import AVFoundation
 
-let inputPath = "~/Desktop/input.wav"
-let outputPath = "~/Desktop/output.mp4"
-let imagePath = "~/Desktop/screenshot.jpg"
-
 class StatusMenuController: NSObject {
     @IBOutlet weak var menuOutlet: NSMenuItem!
     
@@ -22,18 +18,22 @@ class StatusMenuController: NSObject {
     var levelTimer: Timer!
     var pollingTimer: Timer!
     var startTime: Date!
+    
+    var googleProcess: Process?
+    
     @IBOutlet weak var statusMenu: NSMenu!
     
-    let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
+    let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     
     override func awakeFromNib() {
-        let icon = NSImage(named: "statusIcon")
+        let icon = NSImage(named: NSImage.Name(rawValue: "statusIcon"))
         icon?.isTemplate = true // best for dark mode
         statusItem.image = icon
         statusItem.menu = statusMenu
         
         AssistantAPI.resetServer()
         pollForNextTweet()
+        self.spawnGoogle(withQuery: "hello google how are you")
     }
     
     func pollForNextTweet() {
@@ -82,6 +82,23 @@ class StatusMenuController: NSObject {
         })
     }
     
+    func spawnGoogle(withQuery query: String) {
+        googleProcess = Process()
+        let pipe = Pipe()
+        googleProcess?.launchPath = "/Library/Frameworks/Python.framework/Versions/2.7/bin/googlesamples-assistant-pushtotalk"
+        googleProcess?.arguments = []
+        googleProcess?.standardInput = pipe
+        
+        googleProcess?.launch()
+        googleProcess?.qualityOfService = .userInteractive
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: {
+            pipe.fileHandleForWriting.write("".data(using: .utf8)!)
+            self.executeTask("say", arguments: [query])
+            self.record()
+        })
+    }
+    
     private func executeTask(_ name: String, arguments: [String]) {
         let task = Process()
         task.launchPath = "/usr/bin/\(name)"
@@ -91,47 +108,29 @@ class StatusMenuController: NSObject {
     }
     
     func runSiri(rawText: String) {
-        if rawText == "FALSE" {
-            let url = URL(fileURLWithPath: inputPath)
-            player = AVPlayer(url: url)
-        
-            NSWorkspace.shared().launchApplication("/Applications/Siri.app")
-        
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
-                self.player.play()
-            
-                let length = self.player.currentItem?.asset.duration
-                let duration = Int(1000 * (CMTimeGetSeconds(length!)))
-            
-                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(duration + 250), execute: {
-                    self.record()
-                    self.menuOutlet.title = "Listening to Siri..."
-                })
-            })
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
-                let task = Process()
-                task.launchPath = "/usr/bin/say"
-                task.arguments = [rawText]
-                task.launch()
-                task.waitUntilExit()
-            })
-            self.record()
-            self.menuOutlet.title = "Listening to Siri..."
-        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
+            let task = Process()
+            task.launchPath = "/usr/bin/say"
+            task.arguments = [rawText]
+            task.launch()
+            task.waitUntilExit()
+        })
+        self.record()
+        self.menuOutlet.title = "Listening to Siri..."
     }
 
 
     func record() {
+        let outputPath = "\(AppConfiguration.homeDir)/Desktop/output.flac"
         checkFile(path: outputPath)
-        
         let url = URL(fileURLWithPath: outputPath)
+        
         let startTime = Date()
         
-        recorder = try? AVAudioRecorder(url: url, settings: [AVFormatIDKey : kAudioFormatMPEG4AAC, AVSampleRateKey : 44100])
+        recorder = try? AVAudioRecorder(url: url, settings: [AVFormatIDKey : kAudioFormatFLAC, AVSampleRateKey : 44100])
         recorder.prepareToRecord()
         recorder.isMeteringEnabled = true
-        recorder.record()
+        print(recorder.record())
         
         levelTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { (Timer) in
             self.recorder.updateMeters()
@@ -145,6 +144,10 @@ class StatusMenuController: NSObject {
                         //TODO: do something speech-to-text
                         //AssistantAPI.deliverResponse(imagePath: imagePath, audioPath: outputPath)
                         //self.getInput()
+                        self.googleProcess?.terminate()
+                        WatsonAPI.curlSpeechToText(fromFileOnDesktopNamed: "output.flac", completion: { string in
+                            print(string)
+                        })
                     })
                 }
             }
@@ -152,7 +155,7 @@ class StatusMenuController: NSObject {
     }
 
     @IBAction func quitClicked(sender: NSMenuItem) {
-        NSApplication.shared().terminate(self)
+        NSApplication.shared.terminate(self)
     }
     
     

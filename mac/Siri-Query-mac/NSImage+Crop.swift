@@ -26,7 +26,7 @@ extension NSImage {
                                       samplesPerPixel: 4,
                                       hasAlpha: true,
                                       isPlanar: false,
-                                      colorSpaceName: NSDeviceRGBColorSpace,
+                                      colorSpaceName: NSColorSpaceName.deviceRGB,
                                       bytesPerRow: 0,
                                       bitsPerPixel: 0)!
         

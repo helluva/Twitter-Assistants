@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		2E4F36BC1EAC93A4009B431C /* AssistantAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E4F36BB1EAC93A4009B431C /* AssistantAPI.swift */; };
+		2E592F7F201E223000EE36E7 /* WatsonAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E592F7E201E223000EE36E7 /* WatsonAPI.swift */; };
+		2E592F81201E26BC00EE36E7 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E592F80201E26BC00EE36E7 /* AppConfiguration.swift */; };
 		430E44541EABF06300116ABC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430E44531EABF06300116ABC /* AppDelegate.swift */; };
 		430E44581EABF06300116ABC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 430E44571EABF06300116ABC /* Assets.xcassets */; };
 		430E44631EABF2A600116ABC /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 430E44621EABF2A600116ABC /* MainMenu.xib */; };
@@ -17,6 +19,8 @@
 
 /* Begin PBXFileReference section */
 		2E4F36BB1EAC93A4009B431C /* AssistantAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AssistantAPI.swift; sourceTree = "<group>"; };
+		2E592F7E201E223000EE36E7 /* WatsonAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatsonAPI.swift; sourceTree = "<group>"; };
+		2E592F80201E26BC00EE36E7 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
 		430E44501EABF06300116ABC /* Siri-Query-mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Siri-Query-mac.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		430E44531EABF06300116ABC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		430E44571EABF06300116ABC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -59,6 +63,8 @@
 				430E44531EABF06300116ABC /* AppDelegate.swift */,
 				43FDD12C1EAC9792006A1517 /* StatusMenuController.swift */,
 				2E4F36BB1EAC93A4009B431C /* AssistantAPI.swift */,
+				2E592F7E201E223000EE36E7 /* WatsonAPI.swift */,
+				2E592F80201E26BC00EE36E7 /* AppConfiguration.swift */,
 				430E44621EABF2A600116ABC /* MainMenu.xib */,
 				430E44571EABF06300116ABC /* Assets.xcassets */,
 				430E445C1EABF06300116ABC /* Info.plist */,
@@ -94,12 +100,13 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 0920;
 				ORGANIZATIONNAME = SiriQuery;
 				TargetAttributes = {
 					430E444F1EABF06300116ABC = {
 						CreatedOnToolsVersion = 8.3.1;
 						DevelopmentTeam = YT2C78F725;
+						LastSwiftMigration = 0920;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -139,7 +146,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E592F81201E26BC00EE36E7 /* AppConfiguration.swift in Sources */,
 				4342FB3E1EAD144C007BEF69 /* NSImage+Crop.swift in Sources */,
+				2E592F7F201E223000EE36E7 /* WatsonAPI.swift in Sources */,
 				43FDD12D1EAC9792006A1517 /* StatusMenuController.swift in Sources */,
 				2E4F36BC1EAC93A4009B431C /* AssistantAPI.swift in Sources */,
 				430E44541EABF06300116ABC /* AppDelegate.swift in Sources */,
@@ -159,7 +168,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -167,7 +178,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -209,7 +224,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -217,7 +234,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -251,7 +272,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.siriquery.Siri-Query-mac";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -265,7 +287,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.siriquery.Siri-Query-mac";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

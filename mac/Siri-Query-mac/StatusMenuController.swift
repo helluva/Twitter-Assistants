@@ -22,6 +22,9 @@ class StatusMenuController: NSObject {
     var levelTimer: Timer!
     var pollingTimer: Timer!
     var startTime: Date!
+    
+    var googleProcess: Process?
+    
     @IBOutlet weak var statusMenu: NSMenu!
     
     let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
@@ -34,6 +37,7 @@ class StatusMenuController: NSObject {
         
         AssistantAPI.resetServer()
         pollForNextTweet()
+        self.spawnGoogle(withQuery: "hello google how are you")
     }
     
     func pollForNextTweet() {
@@ -79,6 +83,23 @@ class StatusMenuController: NSObject {
                 task.terminate()
                 completion()
             })
+        })
+    }
+    
+    func spawnGoogle(withQuery query: String) {
+        googleProcess = Process()
+        let pipe = Pipe()
+        googleProcess?.launchPath = "/Library/Frameworks/Python.framework/Versions/2.7/bin/googlesamples-assistant-pushtotalk"
+        googleProcess?.arguments = []
+        googleProcess?.standardInput = pipe
+        
+        googleProcess?.launch()
+        googleProcess?.qualityOfService = .userInteractive
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: {
+            pipe.fileHandleForWriting.write("".data(using: .utf8)!)
+            self.executeTask("say", arguments: [query])
+            self.record()
         })
     }
     
@@ -145,6 +166,7 @@ class StatusMenuController: NSObject {
                         //TODO: do something speech-to-text
                         //AssistantAPI.deliverResponse(imagePath: imagePath, audioPath: outputPath)
                         //self.getInput()
+                        self.googleProcess?.terminate()
                     })
                 }
             }

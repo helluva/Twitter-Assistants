@@ -23,22 +23,13 @@ var waiting_for_server = false
 //client-facing endpoints
 //***********************
 
-//uploads an audio file though body["audio-base64"]. response["task-id"] is an identifier for the queued task.
-//if body["raw-text"] exists, the base64 audio is ignored.
-app.post('/uploadBlob', (request, response) => {
+//uploads a tweet query through query["tweet-text"]. response["task-id"] is an identifier for the queued task.
+app.get('/uploadQuery', (request, response) => {
     let task_id = uuid()
     
     //use the raw text if it exists -- otherwise check for the recording
-    if (request.body["raw-text"] != undefined) {
-        rawtexts[task_id] = request.body["raw-text"]
-        console.log("received " + request.body["raw-text"])
-    } else {
-    
-        let file_path = "recordings/" + task_id + ".wav"
-    
-        var audio_base64 = request.body["audio-base64"]
-        fs.writeFile(file_path, audio_base64, 'base64', function(error) { console.log(error) })
-    }
+    rawtexts[task_id] = request.query["tweet-text"]
+    console.log("received \"" + request.query["tweet-text"] + "\"")
     
     queued_tasks.push(task_id)
     console.log(queued_tasks)
@@ -72,8 +63,8 @@ app.get('/reset', (request, response) => {
     response.send({status: 'success'})
 })
 
-app.get('/recordingAvailable', (request, response) => {
-    console.log("recordings avaiable? "+ queued_tasks)
+app.get('/tweetsAvailable', (request, response) => {
+    console.log("tweets avaiable? "+ queued_tasks)
     
     if (waiting_for_server) {
         response.send("false")
@@ -84,49 +75,39 @@ app.get('/recordingAvailable', (request, response) => {
         response.send("false")
     } else {
         response.send(queued_tasks[0]) //send the first task id
-        waiting_for_server = true //don't send another recording until the server sends back a response
+        waiting_for_server = true //don't send another tweet until the server sends back a response
     }
 })
 
 //if the next query has a rawtext, return that rawtext. Otherwise, "false".
-app.get('/rawtext', (request, response) => {
+app.get('/nextTweet', (request, response) => {
     if (queued_tasks.length == 0) {
         response.send("false")
     } else {
         task_id = queued_tasks[0]
-        rawtext = rawtexts[task_id]
-        
-        if (rawtext != undefined) {
-            response.send(rawtext)
-        } else {
-            response.send("false")
-        }
+        nextTweet = rawtexts[task_id]
+        response.send(nextTweet)
     }
 })
 
-//request.body is {"task-id": ..., "siri-response": {"image": ..., "audio" ...}}
-app.post('/deliverSiriResponse', (request, response) => {
+//request.body is {"task-id": ..., "siri-response": ..., "alexa-response": ...}
+app.post('/deliverAssistantResponses', (request, response) => {
     
-    body = request.body
-    
-    task_id = body["task-id"]
-    siri_response = body["siri-response"]
+    task_id = request.body["task-id"]
+    siri_response = request.body["siri-response"]
+    alexa_response = request.body["alexa-response"]
     
     if (task_id == undefined 
         || siri_response == undefined 
-        || siri_response["image"] == undefined 
-        || siri_response["audio"] == undefined) {
-            response.send({status: 'failure'})
-            return
+        || alexa_response == undefined ) 
+    {
+        response.send({status: 'failure'})
+        return
     }
     
     queued_tasks.shift() //remove the current task
     //array.splice(queued_tasks, queued_tasks.indexOf(task_id)) //remove the task
     waiting_for_server = false //allow the server to receive more recordings
-    
-    //write files to disk
-    fs.writeFile("siri-responses/" + task_id + ".png", siri_response["image"], 'base64', function(err) {})
-    fs.writeFile("siri-responses/" + task_id + ".mp4", siri_response["audio"], 'base64', function(err) {})
     
     completed_tasks.push(task_id)
     response.send({status: 'success'})

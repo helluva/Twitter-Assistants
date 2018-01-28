@@ -32,13 +32,32 @@ class StatusMenuController: NSObject {
         statusItem.image = icon
         statusItem.menu = statusMenu
         
-        //SiriQueryAPI.resetServer()
-        //getInput()
-        executeTask("killall", arguments: ["SampleApp"] /* SampleApp is the Alexa runner */)
-        spawnAlexa()
+        AssistantAPI.resetServer()
+        pollForNextTweet()
     }
     
-    func spawnAlexa() {
+    func pollForNextTweet() {
+        AssistantAPI.tweetsAvailable(completion: { tweetsAreAvailable in
+            guard tweetsAreAvailable else {
+                print("No tweets available for download")
+                return
+            }
+            
+            AssistantAPI.textForNextTweet(completion: { tweetText in
+                guard let tweetText = tweetText else { return }
+                print("Received tweet \(tweetText)")
+                self.spawnAlexa(withQuery: tweetText, completion: {
+                    AssistantAPI.deliverResponse(siriResponse: "no siri response", alexaResponse: "spawned alexa response", completion: {
+                        self.pollForNextTweet()
+                    })
+                })
+            })
+        })
+    }
+    
+    func spawnAlexa(withQuery query: String, completion: @escaping () -> Void) {
+        executeTask("killall", arguments: ["SampleApp"] /* SampleApp is the Alexa runner */)
+        
         let task = Process()
         let pipe = Pipe()
         task.launchPath = "/Users/cal/sdk-folder/sdk-build/SampleApp/src/SampleApp"
@@ -49,23 +68,18 @@ class StatusMenuController: NSObject {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: {
             pipe.fileHandleForWriting.write("t".data(using: .utf8)!)
-            self.executeTask("say", arguments: ["Who is Donald Trump?"])
-        })
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 7.0, execute: {
+            self.executeTask("say", arguments: [query])
             pipe.fileHandleForWriting.write("".data(using: .utf8)!)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 6.0, execute: {
+                pipe.fileHandleForWriting.write("q".data(using: .utf8)!)
+            })
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 7.5, execute: {
+                task.terminate()
+                completion()
+            })
         })
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 15.0, execute: {
-            pipe.fileHandleForWriting.write("q".data(using: .utf8)!)
-        })
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 17.0, execute: {
-            task.terminate()
-            NSApplication.shared().terminate(self)
-        })
-        
-        task.waitUntilExit()
     }
     
     private func executeTask(_ name: String, arguments: [String]) {
@@ -128,8 +142,9 @@ class StatusMenuController: NSObject {
                     self.recorder.stop()
                     self.levelTimer.invalidate()
                     DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(10), execute: {
-                        SiriQueryAPI.deliverResponse(imagePath: imagePath, audioPath: outputPath)
-                        self.getInput()
+                        //TODO: do something speech-to-text
+                        //AssistantAPI.deliverResponse(imagePath: imagePath, audioPath: outputPath)
+                        //self.getInput()
                     })
                 }
             }
@@ -155,11 +170,11 @@ class StatusMenuController: NSObject {
     }
     
     
-    func getInput() {
+    /*func getInput() {
         menuOutlet.title = "Waiting for input..."
         
         pollingTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { (Timer) in
-            self.download(url: SiriQueryAPI.baseURL.appendingPathComponent("/nextRecording.wav"), to: URL(fileURLWithPath: inputPath), completion: { text in
+            self.download(url: AssistantAPI.baseURL.appendingPathComponent("/nextRecording.wav"), to: URL(fileURLWithPath: inputPath), completion: { text in
                 self.runSiri(rawText: text)
             })
         }
@@ -168,7 +183,7 @@ class StatusMenuController: NSObject {
     func download(url: URL, to localUrl: URL, completion: @escaping (String) -> ()) {
         checkFile(path: inputPath)
         
-        SiriQueryAPI.recordingAvailable(completion: { newRecordingAvailable in
+        AssistantAPI.textForNextTweet(completion: ?????)(completion: { newRecordingAvailable in
             if newRecordingAvailable {
                 
                 SiriQueryAPI.rawTextForNextQuery(completion: { rawText in
@@ -208,6 +223,6 @@ class StatusMenuController: NSObject {
             }
         })
         
-    }
+    }*/
     
 }

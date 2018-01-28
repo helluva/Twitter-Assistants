@@ -11,12 +11,11 @@
   "readme": "ERROR: No README data found!",
   "version": "0.0.1",
   "dependencies": {
-      "express": "^4.7.3",
-      "request": "^2.81.0",
-      "body-parser": "^1.17.1",
-      "fs": "^0.0.1-security",
-      "request": "^2.81.0",
-      "uuid": "^3.0.0"
+    "express": "^4.7.3",
+    "request": "^2.81.0",
+    "body-parser": "^1.17.1",
+    "fs": "^0.0.1-security",
+    "uuid": "^3.0.0"
   },
   "scripts": {
     "start": "node index.js"

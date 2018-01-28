@@ -27,10 +27,10 @@ class StatusMenuController: NSObject {
     
     @IBOutlet weak var statusMenu: NSMenu!
     
-    let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
+    let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     
     override func awakeFromNib() {
-        let icon = NSImage(named: "statusIcon")
+        let icon = NSImage(named: NSImage.Name(rawValue: "statusIcon"))
         icon?.isTemplate = true // best for dark mode
         statusItem.image = icon
         statusItem.menu = statusMenu
@@ -116,7 +116,7 @@ class StatusMenuController: NSObject {
             let url = URL(fileURLWithPath: inputPath)
             player = AVPlayer(url: url)
         
-            NSWorkspace.shared().launchApplication("/Applications/Siri.app")
+            NSWorkspace.shared.launchApplication("/Applications/Siri.app")
         
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
                 self.player.play()
@@ -174,7 +174,7 @@ class StatusMenuController: NSObject {
     }
 
     @IBAction func quitClicked(sender: NSMenuItem) {
-        NSApplication.shared().terminate(self)
+        NSApplication.shared.terminate(self)
     }
     
     

@@ -18,19 +18,22 @@ class StatusMenuController: NSObject {
     var levelTimer: Timer!
     var pollingTimer: Timer!
     var startTime: Date!
+    
+    var googleProcess: Process?
+    
     @IBOutlet weak var statusMenu: NSMenu!
     
-    let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
+    let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     
     override func awakeFromNib() {
-        let icon = NSImage(named: "statusIcon")
+        let icon = NSImage(named: NSImage.Name(rawValue: "statusIcon"))
         icon?.isTemplate = true // best for dark mode
         statusItem.image = icon
         statusItem.menu = statusMenu
         
-        record()
-        //AssistantAPI.resetServer()
-        //pollForNextTweet()
+        AssistantAPI.resetServer()
+        pollForNextTweet()
+        self.spawnGoogle(withQuery: "hello google how are you")
     }
     
     func pollForNextTweet() {
@@ -79,6 +82,23 @@ class StatusMenuController: NSObject {
         })
     }
     
+    func spawnGoogle(withQuery query: String) {
+        googleProcess = Process()
+        let pipe = Pipe()
+        googleProcess?.launchPath = "/Library/Frameworks/Python.framework/Versions/2.7/bin/googlesamples-assistant-pushtotalk"
+        googleProcess?.arguments = []
+        googleProcess?.standardInput = pipe
+        
+        googleProcess?.launch()
+        googleProcess?.qualityOfService = .userInteractive
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: {
+            pipe.fileHandleForWriting.write("".data(using: .utf8)!)
+            self.executeTask("say", arguments: [query])
+            self.record()
+        })
+    }
+    
     private func executeTask(_ name: String, arguments: [String]) {
         let task = Process()
         task.launchPath = "/usr/bin/\(name)"
@@ -124,6 +144,7 @@ class StatusMenuController: NSObject {
                         //TODO: do something speech-to-text
                         //AssistantAPI.deliverResponse(imagePath: imagePath, audioPath: outputPath)
                         //self.getInput()
+                        self.googleProcess?.terminate()
                     })
                 }
             }
@@ -131,7 +152,7 @@ class StatusMenuController: NSObject {
     }
 
     @IBAction func quitClicked(sender: NSMenuItem) {
-        NSApplication.shared().terminate(self)
+        NSApplication.shared.terminate(self)
     }
     
     

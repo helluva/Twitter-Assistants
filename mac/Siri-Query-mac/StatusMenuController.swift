@@ -159,7 +159,7 @@ class StatusMenuController: NSObject {
     func spawnSiri(rawText: String, completion: @escaping (String?) -> Void) {
         NSWorkspace.shared.launchApplication("/Applications/Siri.app")
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500), execute: {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(700), execute: {
             let task = Process()
             task.launchPath = "/usr/bin/say"
             task.arguments = [rawText]

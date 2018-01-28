@@ -85,10 +85,13 @@ def run_reply_cycle():
 			#tweet the siri response if it exists 
 			if (siriResponse is not None and siriResponse != "WAITING_FOR_RESPONSE" and not hasSentSiriReply):
 			  tweeterName = tweet.user.screen_name
-			  siriMessage = "@" + str(tweeterName) + " Siri: " + siriResponse + " (" + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + ")"
+			  siriMessage = "@" + str(tweeterName) + " " + siriResponse
 			  print("Tweeted " + siriMessage)
 
 			  #this sends our tweet
+			  auth = tweepy.OAuthHandler(keys['siri_consumer_key'], keys['siri_consumer_secret'])
+			  auth.set_access_token(keys['siri_access_token'], keys['siri_access_token_secret'])
+			  api = tweepy.API(auth)
 			  tweet = api.update_status(siriMessage, tweet.id)
 			  print ("Replied to ID: " + str(tweet.id))
 			  mostRecentTweetId = tweet.id
@@ -97,10 +100,13 @@ def run_reply_cycle():
 			#tweet the alexa response if it exists 
 			if (alexaResponse is not None and alexaResponse != "WAITING_FOR_RESPONSE" and not hasSentAlexaReply):
 			  tweeterName = tweet.user.screen_name
-			  alexaMessage = "@" + str(tweeterName) + " Alexa: " + alexaResponse + " (" + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + ")"
+			  alexaMessage = "@" + str(tweeterName) + " " + alexaResponse
 			  print("Tweeted " + alexaMessage)
 
 			  #this sends our tweet
+			  auth = tweepy.OAuthHandler(keys['alexa_consumer_key'], keys['alexa_consumer_secret'])
+			  auth.set_access_token(keys['alexa_access_token'], keys['alexa_access_token_secret'])
+			  api = tweepy.API(auth)
 			  tweet = api.update_status(alexaMessage, tweet.id)
 			  print ("Replied to ID: " + str(tweet.id))
 			  mostRecentTweetId = tweet.id
@@ -109,10 +115,13 @@ def run_reply_cycle():
 			#tweet the alexa response if it exists 
 			if (googleResponse is not None and googleResponse != "WAITING_FOR_RESPONSE" and not hasSentGoogleReply):
 			  tweeterName = tweet.user.screen_name
-			  googleMessage = "@" + str(tweeterName) + " Google Asst: " + googleResponse + " (" + str(currentTime.hour) + ":" + str(currentTime.minute) + ":" + str(currentTime.second) + ")"
-			  print("Tweeted " + siriMessage)
+			  googleMessage = "@" + str(tweeterName) + " " + googleResponse
+			  print("Tweeted " + googleMessage)
 
 			  #this sends our tweet
+			  auth = tweepy.OAuthHandler(keys['google_consumer_key'], keys['google_consumer_secret'])
+			  auth.set_access_token(keys['google_access_token'], keys['google_access_token_secret'])
+			  api = tweepy.API(auth)
 			  tweet = api.update_status(googleMessage, tweet.id)
 			  print ("Replied to ID: " + str(tweet.id))
 			  mostRecentTweetId = tweet.id
@@ -125,7 +134,7 @@ def run_reply_cycle():
 			  idFile.close()
 
 			if hasSentGoogleReply and hasSentAlexaReply and hasSentSiriReply:
-				  shouldContinuePolling = false
+				  shouldContinuePolling = False
 
 			time.sleep(3)
 

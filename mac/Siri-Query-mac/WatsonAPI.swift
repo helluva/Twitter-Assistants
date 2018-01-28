@@ -25,7 +25,7 @@ class WatsonAPI {
             "-s", // silence cURL's progress indicator
             "-X", "POST",
             "-u", "0d884b88-0ed4-43e6-b6d3-a81f4d440ffa:0j6VcHydZj4K", // IBM endpoint username:password
-            "--header", "Content-Type: audio/mpeg",
+            "--header", "Content-Type: audio/flac",
             "--data-binary", "@\(AppConfiguration.homeDir)/Desktop/\(nameOfFileOnDesktop)",
             "https://stream.watsonplatform.net/speech-to-text/api/v1/recognize"]
         
@@ -39,6 +39,7 @@ class WatsonAPI {
         let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
         guard let json = try? JSONSerialization.jsonObject(with: outputData, options: []) as? [String: Any] else {
             print("Failed to retrevie speech to text")
+            print("Response: \(String(data: outputData, encoding: .utf8) ?? "unknown")")
             completion(nil)
             return
         }

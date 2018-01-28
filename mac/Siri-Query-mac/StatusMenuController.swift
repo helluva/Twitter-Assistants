@@ -121,13 +121,13 @@ class StatusMenuController: NSObject {
 
 
     func record() {
-        let outputPath = "\(AppConfiguration.homeDir)/Desktop/output.mp4"
+        let outputPath = "\(AppConfiguration.homeDir)/Desktop/output.flac"
         checkFile(path: outputPath)
         let url = URL(fileURLWithPath: outputPath)
         
         let startTime = Date()
         
-        recorder = try? AVAudioRecorder(url: url, settings: [AVFormatIDKey : kAudioFormatMPEG4AAC, AVSampleRateKey : 44100])
+        recorder = try? AVAudioRecorder(url: url, settings: [AVFormatIDKey : kAudioFormatFLAC, AVSampleRateKey : 44100])
         recorder.prepareToRecord()
         recorder.isMeteringEnabled = true
         print(recorder.record())
@@ -145,6 +145,9 @@ class StatusMenuController: NSObject {
                         //AssistantAPI.deliverResponse(imagePath: imagePath, audioPath: outputPath)
                         //self.getInput()
                         self.googleProcess?.terminate()
+                        WatsonAPI.curlSpeechToText(fromFileOnDesktopNamed: "output.flac", completion: { string in
+                            print(string)
+                        })
                     })
                 }
             }
